@@ -1,17 +1,11 @@
-from flask import Flask
+from flask import Blueprint
 from flask_restful import Api
-from flask_sqlalchemy import SQLAlchemy
+from resources.SystemCheck import SystemCheck
+from resources.TaskListCreate import TaskListCreate
 
-from utils.settings import config_by_name
+api_bp = Blueprint('api_bp', __name__)
+api = Api(api_bp)
 
-
-# initialize sql-alchemy
-db = SQLAlchemy()
-
-
-def create_app(config_name):
-    app = Flask(__name__)
-    app.config.from_object(config_by_name[config_name])
-    db.init_app(app)
-
-    return app
+# Route
+api.add_resource(SystemCheck, '/system-check/')
+api.add_resource(TaskListCreate, '/tasks/')

@@ -1,6 +1,6 @@
 import os
 
-from main.app import create_app
+from run import create_app
 
 
 config_name = os.getenv('APP_SETTINGS')
