@@ -11,6 +11,7 @@ class TaskListCreate(Resource):
     def get(self):
         tasks = Task.query.all()
         # tasks = tasks_schema.dump(tasks).data
+        # print(request.url)
         tasks = tasks_schema.dump(tasks)
         return {'status': 'success', 'results': tasks}, 200
 
@@ -37,3 +38,15 @@ class TaskListCreate(Resource):
         result = task_schema.dump(new_task)
 
         return result, 201
+
+
+class SpecificTask(Resource):
+    def get(self, task_id):
+        # print(task_id)
+        task = Task.query.get(task_id)
+        if task:
+            result = task_schema.dump(task)
+
+            return result
+
+        return {'message': 'task not found'}, 404

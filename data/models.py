@@ -1,4 +1,6 @@
 import datetime
+
+from flask_marshmallow.fields import URLFor
 from marshmallow import fields
 from marshmallow.validate import Length
 from flask_marshmallow import Marshmallow
@@ -30,3 +32,7 @@ class TaskSchema(ma.Schema):
     description = fields.String(required=True, validate=Length(max=300))
     created_at = fields.DateTime(required=False)
     updated_at = fields.DateTime(required=False)
+    _link = URLFor(endpoint='api_bp.task', task_id='<id>')
+
+    class Meta:
+        model = Task
