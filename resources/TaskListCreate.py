@@ -25,7 +25,7 @@ class TaskListCreate(Resource):
         errors = task_schema.validate(request_data)
         # print(errors)
         if errors:
-            return errors, 400
+            return errors, 422
 
         task = Task.query.filter_by(name=request_data['name']).first()
         if task:
@@ -44,9 +44,45 @@ class SpecificTask(Resource):
     def get(self, task_id):
         # print(task_id)
         task = Task.query.get(task_id)
-        if task:
-            result = task_schema.dump(task)
+        if not task:
+            return {'message': 'task not found'}, 404
 
-            return result
+        result = task_schema.dump(task)
 
-        return {'message': 'task not found'}, 404
+        return result
+
+    def put(self, task_id):
+        update_data = request.get_json(force=True)
+        if not update_data:
+            return {'message': 'no data passed to update'}, 400
+
+        # validate input
+        errors = task_schema.validate(update_data)
+        if errors:
+            return errors, 422
+
+        task = Task.query.get(task_id)
+        if not task:
+            return {'message': 'task not found'}, 404
+
+        # check if name already exists
+        if Task.query.filter_by(name=update_data['name']).first():
+            return {'message': 'A task with name {} already exists'.format(update_data['name'])}, 400
+
+        task.name = update_data['name']
+        task.description = update_data['description']
+        db.session.commit()
+
+        result = task_schema.dump(task)
+
+        return {'status': 'success', 'results': result}, 200
+
+    def delete(self, task_id):
+        task = Task.query.get(task_id)
+        if not task:
+            return {'message': 'task not found'}, 404
+
+        Task.query.filter_by(id=task_id).delete()
+        db.session.commit()
+
+        return {'message': 'task deleted'}, 200
