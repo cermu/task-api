@@ -1,4 +1,4 @@
-from flask import request
+from flask import request, url_for
 from flask_restful import Resource
 from data.models import db, Task, TaskSchema
 
@@ -9,6 +9,24 @@ task_schema = TaskSchema()
 
 class TaskListCreate(Resource):
     def get(self):
+        args = request.args
+        if args:
+            # print(args.get('page'))
+            page = args.get('page', 1, type=int)
+            resp = Task.query.paginate(page, 2, False)
+            count = len(Task.query.all())
+            print(request.url)
+            # print(resp.has_next)
+            # print(list(resp.items))
+            results = tasks_schema.dump(resp.items)
+            next_url = url_for('api_bp.tasks', page=resp.next_num) \
+                if resp.has_next else None
+
+            prev_url = url_for('api_bp.tasks', page=resp.prev_num) \
+                if resp.has_prev else None
+
+            return {'count': count, 'next': next_url, 'prev': prev_url, 'results': results}
+
         tasks = Task.query.all()
         # tasks = tasks_schema.dump(tasks).data
         # print(request.url)
